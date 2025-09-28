@@ -1,0 +1,82 @@
+groups:
+  - name: rodio_oracle_alerts
+    rules:
+      # Alerte si un nœud est down
+      - alert: NodeDown
+        expr: rodio_node_health == 0
+        for: 30s
+        labels:
+          severity: critical
+        annotations:
+          summary: "RODIO node {{ $labels.node_id }} is down"
+          description: "Node {{ $labels.node_id }} has been down for more than 30 seconds"
+
+      # Alerte si le taux de consensus est faible
+      - alert: LowConsensusRate
+        expr: rodio_consensus_success_rate < 0.8
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Low consensus success rate"
+          description: "Consensus success rate is {{ $value | humanizePercentage }} for more than 2 minutes"
+
+      # Alerte si pas de lectures de capteurs
+      - alert: NoSensorReadings
+        expr: increase(rodio_sensor_readings_total[5m]) == 0
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "No sensor readings received"
+          description: "No sensor readings have been received for 5 minutes on {{ $labels.node_id }}"
+
+      # Alerte si trop de transactions échouent
+      - alert: HighTransactionFailureRate
+        expr: rate(rodio_transactions_failed[5m]) / rate(rodio_transactions_total[5m]) > 0.1
+        for: 3m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High blockchain transaction failure rate"
+          description: "Transaction failure rate is {{ $value | humanizePercentage }} for more than 3 minutes"
+
+      # Alerte si la qualité des données est faible
+      - alert: LowDataQuality
+        expr: rodio_data_quality_score < 0.7
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Low data quality detected"
+          description: "Data quality score is {{ $value }} for sensor {{ $labels.sensor_type }}"
+
+      # Alerte si un nœud a une réputation faible
+      - alert: LowNodeReputation
+        expr: rodio_node_reputation < 0.5
+        for: 10m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Node reputation critically low"
+          description: "Node {{ $labels.node_id }} has reputation {{ $value }} - potential malicious behavior"
+
+      # Alerte si pas assez de nœuds pour le consensus
+      - alert: InsufficientNodesForConsensus
+        expr: count(rodio_node_health == 1) < 3
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Insufficient nodes for consensus"
+          description: "Only {{ $value }} nodes are healthy, minimum 3 required for consensus"
+
+      # Alerte si la latence blockchain est élevée
+      - alert: HighBlockchainLatency
+        expr: rodio_blockchain_latency_p95 > 10000
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High blockchain latency"
+          description: "95th percentile blockchain latency is {{ $value }}ms for more than 5 minutes"

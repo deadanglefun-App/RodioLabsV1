@@ -1,0 +1,122 @@
+version: '3.8'
+
+services:
+  # Base de données de développement
+  postgres-dev:
+    image: postgres:13
+    environment:
+      POSTGRES_DB: rodio_dev
+      POSTGRES_USER: rodio
+      POSTGRES_PASSWORD: rodio_dev_password
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_dev_data:/var/lib/postgresql/data
+      - ./init-db.sql:/docker-entrypoint-initdb.d/init-db.sql
+    networks:
+      - rodio-dev
+
+  # Redis pour cache de développement
+  redis-dev:
+    image: redis:6-alpine
+    ports:
+      - "6379:6379"
+    networks:
+      - rodio-dev
+
+  # MQTT Broker de développement
+  mqtt-broker-dev:
+    image: eclipse-mosquitto:2.0
+    ports:
+      - "1883:1883"
+      - "9001:9001"
+    volumes:
+      - ./mosquitto-dev.conf:/mosquitto/config/mosquitto.conf
+    networks:
+      - rodio-dev
+
+  # Blockchain locale (Ganache)
+  ganache-dev:
+    image: trufflesuite/ganache-cli:latest
+    ports:
+      - "8545:8545"
+    command: >
+      --mnemonic "rodio development network local blockchain testing environment"
+      --gasLimit 10000000
+      --accounts 10
+      --defaultBalanceEther 1000
+      --host 0.0.0.0
+    networks:
+      - rodio-dev
+
+  # Nœud RODIO de développement
+  rodio-node-dev:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.dev
+    volumes:
+      - ../:/app
+      - /app/__pycache__
+      - /app/.pytest_cache
+    environment:
+      - NODE_ID=DEV_NODE_001
+      - LOG_LEVEL=DEBUG
+      - POSTGRES_URL=postgresql://rodio:rodio_dev_password@postgres-dev:5432/rodio_dev
+      - REDIS_URL=redis://redis-dev:6379
+      - MQTT_BROKER=mqtt-broker-dev
+      - BLOCKCHAIN_RPC=http://ganache-dev:8545
+    ports:
+      - "8080:8080"
+      - "5678:5678"  # Port pour debugger
+    depends_on:
+      - postgres-dev
+      - redis-dev
+      - mqtt-broker-dev
+      - ganache-dev
+    networks:
+      - rodio-dev
+    restart: unless-stopped
+
+  # Monitoring de développement
+  prometheus-dev:
+    image: prom/prometheus:latest
+    ports:
+      - "9090:9090"
+    volumes:
+      - ../monitoring/prometheus-dev.yml:/etc/prometheus/prometheus.yml
+    networks:
+      - rodio-dev
+
+  grafana-dev:
+    image: grafana/grafana:latest
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=rodio_dev
+    volumes:
+      - grafana_dev_data:/var/lib/grafana
+      - ../monitoring/grafana/dashboards:/etc/grafana/provisioning/dashboards
+      - ../monitoring/grafana/datasources:/etc/grafana/provisioning/datasources
+    networks:
+      - rodio-dev
+
+  # Simulateur de capteurs pour développement
+  sensor-simulator:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.simulator
+    environment:
+      - MQTT_BROKER=mqtt-broker-dev
+      - SIMULATION_MODE=development
+    depends_on:
+      - mqtt-broker-dev
+    networks:
+      - rodio-dev
+
+volumes:
+  postgres_dev_data:
+  grafana_dev_data:
+
+networks:
+  rodio-dev:
+    driver: bridge

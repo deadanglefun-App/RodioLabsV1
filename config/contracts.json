@@ -1,0 +1,50 @@
+{
+  "DataOracle": {
+    "address": "0x1234567890123456789012345678901234567890",
+    "abi": [
+      {
+        "inputs": [
+          {"name": "sensorId", "type": "string"},
+          {"name": "value", "type": "int256"},
+          {"name": "timestamp", "type": "uint256"}
+        ],
+        "name": "submitData",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+      },
+      {
+        "inputs": [{"name": "sensorId", "type": "string"}],
+        "name": "getLatestData",
+        "outputs": [
+          {"name": "value", "type": "int256"},
+          {"name": "timestamp", "type": "uint256"}
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      }
+    ]
+  },
+  "StakingContract": {
+    "address": "0x9876543210987654321098765432109876543210",
+    "abi": [
+      {
+        "inputs": [{"name": "nodeAddress", "type": "address"}],
+        "name": "getStake",
+        "outputs": [{"name": "", "type": "uint256"}],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {"name": "nodeAddress", "type": "address"},
+          {"name": "amount", "type": "uint256"}
+        ],
+        "name": "slashStake",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+      }
+    ]
+  }
+}

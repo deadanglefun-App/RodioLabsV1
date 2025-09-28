@@ -1,0 +1,51 @@
+FROM python:3.9-slim
+
+# Métadonnées
+LABEL maintainer="RODIO Network"
+LABEL version="1.0.0-dev"
+LABEL description="RODIO Oracle Node - Development Environment"
+
+# Variables d'environnement pour le développement
+ENV PYTHONUNBUFFERED=1
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV RODIO_ENV=development
+ENV LOG_LEVEL=DEBUG
+
+WORKDIR /app
+
+# Installation des dépendances système pour le développement
+RUN apt-get update && apt-get install -y \
+    gcc \
+    curl \
+    git \
+    vim \
+    htop \
+    net-tools \
+    && rm -rf /var/lib/apt/lists/*
+
+# Installation des dépendances Python (dev + prod)
+COPY requirements.txt requirements-dev.txt ./
+RUN pip install --no-cache-dir -r requirements-dev.txt
+
+# Copie du code source
+COPY . .
+
+# Installation en mode développement
+RUN pip install -e .
+
+# Création d'un utilisateur de développement
+RUN useradd -m -u 1000 -s /bin/bash rodio-dev && \
+    chown -R rodio-dev:rodio-dev /app
+
+# Configuration pour le développement
+USER rodio-dev
+
+# Exposition des ports
+EXPOSE 8080 5678
+
+# Healthcheck pour développement
+HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
+    CMD curl -f http://localhost:8080/health || exit 1
+
+# Point d'entrée pour développement avec hot reload
+CMD ["python", "-m", "debugpy", "--listen", "0.0.0.0:5678", "--wait-for-client", "main.py"]

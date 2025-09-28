@@ -1,0 +1,44 @@
+{
+  "node_id": "RODIO_GATEWAY_001",
+  "network": {
+    "blockchain_rpc": "https://polygon-rpc.com",
+    "contract_address": "0x1234567890123456789012345678901234567890",
+    "private_key": "YOUR_PRIVATE_KEY_HERE"
+  },
+  "sensors": {
+    "temperature": {
+      "adapter": "TemperatureAdapter",
+      "mqtt_topic": "sensors/temperature",
+      "polling_interval": 30
+    },
+    "humidity": {
+      "adapter": "HumidityAdapter", 
+      "mqtt_topic": "sensors/humidity",
+      "polling_interval": 30
+    },
+    "gps": {
+      "adapter": "GPSAdapter",
+      "mqtt_topic": "sensors/gps",
+      "polling_interval": 60
+    }
+  },
+  "consensus": {
+    "min_nodes": 3,
+    "consensus_threshold": 0.8,
+    "outlier_tolerance": 0.05
+  },
+  "staking": {
+    "min_stake": "1000000000000000000000",
+    "staking_contract": "0x9876543210987654321098765432109876543210"
+  },
+  "peer_nodes": [
+    "http://gateway-2:8080",
+    "http://gateway-3:8080",
+    "http://gateway-4:8080"
+  ],
+  "monitoring": {
+    "api_port": 8080,
+    "metrics_enabled": true,
+    "prometheus_endpoint": "/metrics"
+  }
+}

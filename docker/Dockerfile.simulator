@@ -1,0 +1,23 @@
+FROM python:3.9-slim
+
+# Métadonnées
+LABEL maintainer="RODIO Network"
+LABEL description="RODIO Sensor Simulator"
+
+WORKDIR /app
+
+# Installation des dépendances
+RUN pip install paho-mqtt asyncio-mqtt
+
+# Copie du simulateur
+COPY scripts/simulate-sensors.py .
+COPY scripts/sensor_profiles/ ./sensor_profiles/
+
+# Variables d'environnement
+ENV MQTT_BROKER=localhost
+ENV MQTT_PORT=1883
+ENV SIMULATION_MODE=production
+ENV SENSOR_COUNT=10
+
+# Point d'entrée
+CMD ["python", "simulate-sensors.py"]

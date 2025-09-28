@@ -1,0 +1,91 @@
+{
+  "node": {
+    "id": "RODIO_GATEWAY_001",
+    "type": "gateway",
+    "region": "eu-west-1",
+    "description": "Gateway node for IoT sensors in Europe West"
+  },
+  "network": {
+    "blockchain_rpc": "https://polygon-rpc.com",
+    "chain_id": 137,
+    "contract_address": "0x1234567890123456789012345678901234567890",
+    "private_key": "YOUR_PRIVATE_KEY_HERE",
+    "gas_limit": 300000,
+    "gas_price_gwei": 2
+  },
+  "sensors": {
+    "mqtt": {
+      "broker": "iot.example.com",
+      "port": 1883,
+      "username": "rodio_node",
+      "password": "secure_password",
+      "topics": [
+        "sensors/+/temperature",
+        "sensors/+/humidity",
+        "sensors/+/gps"
+      ]
+    },
+    "adapters": {
+      "temperature": {
+        "adapter": "TemperatureAdapter",
+        "mqtt_topic": "sensors/temperature",
+        "polling_interval": 30,
+        "min_temperature": -50.0,
+        "max_temperature": 100.0,
+        "unit": "celsius"
+      },
+      "humidity": {
+        "adapter": "HumidityAdapter",
+        "mqtt_topic": "sensors/humidity",
+        "polling_interval": 30,
+        "min_humidity": 0.0,
+        "max_humidity": 100.0
+      },
+      "gps": {
+        "adapter": "GPSAdapter",
+        "mqtt_topic": "sensors/gps",
+        "polling_interval": 60,
+        "base_latitude": 48.8566,
+        "base_longitude": 2.3522
+      }
+    }
+  },
+  "consensus": {
+    "min_nodes": 3,
+    "consensus_threshold": 0.8,
+    "outlier_tolerance": 0.05,
+    "timeout_seconds": 30
+  },
+  "staking": {
+    "min_stake": "1000000000000000000000",
+    "staking_contract": "0x9876543210987654321098765432109876543210",
+    "slash_threshold": 0.1
+  },
+  "peer_nodes": [
+    "http://gateway-2.rodio.network:8080",
+    "http://gateway-3.rodio.network:8080",
+    "http://gateway-4.rodio.network:8080"
+  ],
+  "monitoring": {
+    "api_port": 8080,
+    "metrics_enabled": true,
+    "prometheus_endpoint": "/metrics",
+    "log_level": "INFO",
+    "health_check_interval": 30
+  },
+  "security": {
+    "enable_tls": true,
+    "cert_file": "/app/certs/server.crt",
+    "key_file": "/app/certs/server.key",
+    "reputation_decay_rate": 0.001
+  },
+  "database": {
+    "url": "postgresql://user:password@localhost:5432/rodio",
+    "pool_size": 10,
+    "max_overflow": 20
+  },
+  "cache": {
+    "redis_url": "redis://localhost:6379",
+    "ttl_seconds": 300
+  }
+}
